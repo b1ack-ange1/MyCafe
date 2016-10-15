@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+    template="/WEB-INF/template.xhtml">
+                    
+    <ui:define name="content">
+        <div class="ui-g dashboard">
+            <div class="ui-md-12">
+                <ui:repeat var="task" value="#{dashboardManagedBean.todayTaskList}" varStatus="status">
+                    <div class="ui-g-12 ui-md-4">
+                        <div class="card overview">
+                            <div class="overview-content clearfix">
+                                <h:outputText value="#{task.startTime}" class="overview-title">
+                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                </h:outputText>
+                                <h:outputLabel value=" — " class="overview-title"/>
+                                <h:outputText value="#{task.endTime}" class="overview-title">
+                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                </h:outputText>
+                                <span class="overview-detail">#{task.user.firstName}</span>
+                                <img src="resources/ultima-layout/images/#{task.user.firstName}.png" style="background:top left no-repeat;background-size:60px 60px;width: 60px;height: 60px;margin: 0 auto 5px auto;border-radius: 50%;" align="right"></img>                                     
+                            </div>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </div>
+            <div class="ui-g-12 ui-md-8">
+                <p:panel header="Schedule Calendar" style="height:100%">
+                    <p:schedule value="#{dashboardManagedBean.scheduleModel}" timeZone="GMT+8">
+                        <p:ajax event="eventSelect" listener="#{dashboardManagedBean.onEventSelect}" update="dialogViewEvent" oncomplete="PF('dialogViewEvent').show();" />
+                    </p:schedule>
+                </p:panel>    
+            </div>
+            <p:dialog id="dialogViewEvent" modal="true" header="Work Details" widgetVar="dialogViewEvent" closable="true">
+                <h:panelGrid id="eventDetails" columns="2">
+                    <p:outputLabel value="Type: " style="font-weight:bold"/>       
+                    <p:outputLabel value="#{dashboardManagedBean.event.title} Shift"/>
+                    
+                    <p:outputLabel value="From: " style="font-weight:bold"/>
+                    
+                    <p:outputLabel id="from" value="#{dashboardManagedBean.event.startDate}">
+                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                    </p:outputLabel>
+                    <p:outputLabel value="To: " style="font-weight:bold"/>
+                    
+                    <p:outputLabel id="to" value="#{dashboardManagedBean.event.endDate}">
+                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                    </p:outputLabel>
+                </h:panelGrid>   
+            </p:dialog> 
+            <div class="ui-g-12 ui-md-4">
+                <p:panel id="summaryTable" header="Summary" style="height:100%">
+                    <div class="activity-header">
+                        <div class="ui-g">
+                            <div class="ui-g-6">
+                                <span style="font-weight:bold">Latest Update</span>
+                                <p>Retrieved by 
+                                    <h:outputText value="#{dashboardManagedBean.userSummary.generateDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" timeZone="Singapore"/>
+                                    </h:outputText>
+                                </p>
+                            </div>
+                            <div class="ui-g-6" style="text-align:right"> 
+                                <p:commandButton icon="ui-icon-update" actionListener="#{dashboardManagedBean.generateUserSummary()}" update="summaryTable"/>                           
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="activity-list">
+                        <li>
+                            <div class="count">$#{dashboardManagedBean.userSummary.weeklyPayment}</div>
+                            
+                            <div class="ui-g">
+                                <div class="ui-g-6">Weekly Income</div>
+                                <div class="ui-g-6">#{dashboardManagedBean.generateWeeklyPercent()}%</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="count" style="background-color:#ffc107">#{dashboardManagedBean.userSummary.weeklyWorkingHour} h</div>
+                            <div class="ui-g">
+                                <div class="ui-g-6">Weekly Working Hours</div>
+                                <div class="ui-g-6">#{dashboardManagedBean.generateWeeklyPercent()}%</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="count" style="background-color:#673AB7">$#{dashboardManagedBean.userSummary.monthlyPayment}</div>
+                            <div class="ui-g">
+                                <div class="ui-g-6">Monthly Income</div>
+                                <div class="ui-g-6">#{dashboardManagedBean.generateMonthlyPercent()}%</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="count" style="background-color:#00bcd4">#{dashboardManagedBean.userSummary.monthlyWorkingHour} h</div>
+                            <div class="ui-g">
+                                <div class="ui-g-6">Monthly Working Hours</div>
+                                <div class="ui-g-6">#{dashboardManagedBean.generateMonthlyPercent()}%</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="count" style="background-color:#607D8B">$#{dashboardManagedBean.userSummary.totalPayment}</div>
+                            <div class="ui-g">
+                                <div class="ui-g-6">Total Income</div>
+                                <div class="ui-g-6"></div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="count" style="background-color:#FF5722">#{dashboardManagedBean.userSummary.totalWorkingHour} h</div>
+                            <div class="ui-g">
+                                <div class="ui-g-6">Total Working Hours</div>
+                                <div class="ui-g-6"></div>
+                            </div>
+                        </li>
+                    </ul>
+                </p:panel>
+            </div>
+        </div>
+    </ui:define>
+        
+</ui:composition>

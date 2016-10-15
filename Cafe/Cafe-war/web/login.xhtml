@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+        </f:facet>
+        <title>Dandelion</title>
+        <h:outputScript name="js/ripple.js" library="ultima-layout" />
+        <h:outputScript name="js/layout.js" library="ultima-layout" />
+    </h:head>
+    
+    <h:body styleClass="login-body">
+        <div class="card login-panel ui-fluid">
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:graphicImage name="images/logo-ultima.svg" library="ultima-layout" />
+                </div>
+                <h:form id="formLogin">
+                    <p:growl id="loginMessage" showDetail="false"/>
+                    <div class="ui-g-12">
+                        <h:panelGroup styleClass="md-inputfield">
+                            <p:inputText id="email" value="#{loginManagedBean.email}" maxlength="32" required="true" requiredMessage="Email is required."/>
+                            <label>Email</label>
+                        </h:panelGroup>
+                    </div>
+                    <div class="ui-g-12">
+                        <h:panelGroup styleClass="md-inputfield">
+                            <p:password id="password" value="#{loginManagedBean.password}" maxlength="32" required="true" requiredMessage="Password is required."/>
+                            <label>Password</label>
+                        </h:panelGroup>
+                    </div>
+                    <div class="ui-g-12">
+                        <p:commandButton value="Sign In" icon="ui-icon-person" update="loginMessage" actionListener="#{loginManagedBean.userLogin()}"/>
+                        <p:button outcome="/dashboard" value="Forgot Password" icon="ui-icon-help" styleClass="secondary"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+        
+        <h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
+        <h:outputStylesheet name="css/layout-#{guestPreferences.theme}.css" library="ultima-layout" />
+    </h:body>
+    
+</html>

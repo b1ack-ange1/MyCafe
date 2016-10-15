@@ -1,0 +1,313 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+    template="/WEB-INF/template.xhtml">
+        
+    <ui:define name="content">
+        <div class="ui-g dashboard">
+            <div class="ui-md-12">
+                <ui:repeat var="task" value="#{dashboardManagedBean.todayTaskList}" varStatus="status">
+                    <div class="ui-g-12 ui-md-4">
+                        <div class="card overview">
+                            <div class="overview-content clearfix">
+                                <h:outputText value="#{task.startTime}" class="overview-title">
+                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                </h:outputText>
+                                <h:outputLabel value=" — " class="overview-title"/>
+                                <h:outputText value="#{task.endTime}" class="overview-title">
+                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                </h:outputText>
+                                <span class="overview-detail">#{task.user.firstName}</span>
+                                <img src="resources/ultima-layout/images/#{task.user.firstName}.png" style="background:top left no-repeat;background-size:60px 60px;width: 60px;height: 60px;margin: 0 auto 5px auto;border-radius: 50%;" align="right"></img>                                     
+                            </div>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </div>
+            <div class="ui-g-12 ui-md-12">
+                <p:panel header="Schedule Calendar" style="height:100%">
+                    <p:schedule value="#{dashboardManagedBean.scheduleModelAdmin}" timeZone="GMT+8">
+                        <p:ajax event="eventSelect" listener="#{dashboardManagedBean.onEventSelect}" update="dialogViewEvent" oncomplete="PF('dialogViewEvent').show();" />
+                        <p:ajax event="dateSelect" listener="#{dashboardManagedBean.onDateSelect}" update="dialogNewEvent" oncomplete="PF('dialogNewEvent').show();" />
+                    </p:schedule>
+                </p:panel>    
+            </div>
+            <p:dialog id="dialogViewEvent" modal="true" header="Work Details" widgetVar="dialogViewEvent" closable="true">
+                <h:form id="dialogViewEventForm">
+                    <p:panelGrid styleClass="nba-grid">
+                        <p:row style="border: none;">
+                            <p:column rowspan="2" style="border: none;">
+                                <p:graphicImage name="images/#{dashboardManagedBean.selectedTask.taskDay}.png" library="ultima-layout" width="45"/>
+                            </p:column>
+                            <p:column style="border: none;font-weight: bold;">
+                                <span class="name">
+                                    <h:outputText value="#{dashboardManagedBean.selectedTask.startTime}" class="overview-title">
+                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                    </h:outputText>
+                                    <h:outputLabel value=" — " class="overview-title"/>
+                                    <h:outputText value="#{dashboardManagedBean.selectedTask.endTime}" class="overview-title">
+                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                    </h:outputText>
+                                </span>
+                            </p:column>
+                        </p:row> 
+                        <p:row style="border: none;">
+                            <p:column style="border: none;">
+                                <span class="email">Current owner: #{dashboardManagedBean.selectedTask.user.firstName}</span>  
+                            </p:column>
+                        </p:row>
+                        
+                        <p:row style="border: none; text-align: center">
+                            <p:column colspan="2" style="border: none;" >
+                                <p:selectOneButton value="#{dashboardManagedBean.currentArrangement}">
+                                    <p:ajax update="@form dialogViewEventForm"/>
+                                    <f:selectItem itemLabel="Edit Schedule" itemValue="edit"/>
+                                    <f:selectItem itemLabel="Delete Schedule" itemValue="delete" />
+                                </p:selectOneButton>
+                            </p:column>
+                        </p:row>
+                        
+                        <p:row style="border: none;">
+                            <ui:fragment rendered="#{dashboardManagedBean.retrieveCurrentArrangementType()}">
+                                <p:column style="border: none;">
+                                    <p:outputLabel value="Shift:"/>
+                                </p:column>
+                                <p:column style="border: none;">
+                                    <p:selectOneMenu value="#{dashboardManagedBean.shiftChoice}">
+                                        <p:ajax listener="#{dashboardManagedBean.printShift}"/>
+                                        <f:selectItem itemLabel="Select One" itemValue="" />
+                                        <f:selectItems value="#{dashboardManagedBean.retrieveShiftList()}" var="shift" itemLabel="#{shift}" itemValue="#{shift}" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </ui:fragment>
+                        </p:row>   
+                        
+                        <p:row style="border: none;">
+                            <ui:fragment rendered="#{dashboardManagedBean.retrieveCurrentArrangementType()}">
+                                <p:column style="border: none;">
+                                    <p:outputLabel value="Taker:"/>
+                                </p:column>
+                                <p:column style="border: none;">
+                                    <p:selectOneMenu value="#{dashboardManagedBean.selectedUserEmail}">
+                                        <p:ajax listener="#{dashboardManagedBean.printSelectedUser}"/>
+                                        <f:selectItem itemLabel="Select One" itemValue="" />
+                                        <f:selectItems value="#{dashboardManagedBean.retrieveAvailableUsers()}" var="availableUser" itemLabel="#{availableUser.firstName}" itemValue="#{availableUser.email}" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </ui:fragment>
+                        </p:row> 
+                        
+                        <p:row style="border: none; text-align: center">
+                            <p:column colspan="2" style="border: none;" >
+                                <p:commandButton value="CONFIRM" icon="ui-icon-send" actionListener="#{dashboardManagedBean.updateTask(dashboardManagedBean.selectedTask)}" oncomplete="PF('dialogViewEvent').hide();"/>
+                            </p:column>
+                        </p:row>                              
+                        
+                    </p:panelGrid> 
+                </h:form>
+            </p:dialog>
+            <p:dialog id="dialogNewEvent" modal="true" header="New Schedule" widgetVar="dialogNewEvent" closable="true">
+                <h:form id="dialogNewEventForm">
+                    <p:panelGrid styleClass="nba-grid">                    
+                        <p:row style="border: none;">
+                            <p:column style="border: none;">
+                                <p:outputLabel value="Taker:"/>
+                            </p:column>
+                            <p:column style="border: none;">
+                                <p:selectOneMenu value="#{dashboardManagedBean.selectedUserEmail}">
+                                    <p:ajax listener="#{dashboardManagedBean.printSelectedUser}"/>
+                                    <f:selectItem itemLabel="Select One" itemValue="" />
+                                    <f:selectItems value="#{dashboardManagedBean.retrieveAvailableUsers()}" var="availableUser" itemLabel="#{availableUser.firstName}" itemValue="#{availableUser.email}" />
+                                </p:selectOneMenu>
+                            </p:column>
+                        </p:row> 
+                        <p:row style="border: none;">
+                            <p:column style="border: none;">
+                                <p:outputLabel for="startTime" value="Start Time:" />
+                            </p:column>
+                            <p:column style="border: none;" >
+                                <p:calendar id="startTime" pattern="dd MMM HH:mm a" value="#{dashboardManagedBean.selectedStart}"/>
+                            </p:column>
+                        </p:row>
+                        <p:row style="border: none;">
+                            <p:column style="border: none;">
+                                <p:outputLabel for="endTime" value="End Time:" />
+                            </p:column>
+                            <p:column style="border: none;" >
+                                <p:calendar id="endTime" pattern="dd MMM HH:mm a" value="#{dashboardManagedBean.selectedEnd}" />
+                            </p:column>
+                        </p:row>
+                        <p:row style="border: none; text-align: center">
+                            <p:column colspan="2" style="border: none;" >
+                                <p:commandButton value="CONFIRM" icon="ui-icon-send" actionListener="#{dashboardManagedBean.createNewTask()}" oncomplete="PF('dialogNewEvent').hide();"/>
+                            </p:column>
+                        </p:row>  
+                    </p:panelGrid>
+                </h:form>  
+            </p:dialog>
+            <div class="ui-g-12 ui-lg-4 contacts">
+                <p:panel header="Switch Request">
+                    <ui:fragment rendered="#{!scheduleManagementManagedBean.hasRequestsFromOthers()}">
+                        <ui:repeat id="requestFromOthers_repeat" var="swapPermissionFromOthers" value="#{scheduleManagementManagedBean.swapPermissionsFromOthers}" varStatus="status">
+                            <ul>
+                                <li>
+                                    <a href="#" onclick="document.getElementById('requestFromOthers_repeat:#{status.index}:requestFromOthersEditButton').click()">
+                                        <p:graphicImage name="images/#{swapPermissionFromOthers.owner.firstName}.png" library="ultima-layout" width="45"/>
+                                        <span class="name">#{swapPermissionFromOthers.owner.firstName} <h:outputText value="#{swapPermissionFromOthers.task.startTime}" class="overview-title">
+                                                <f:convertDateTime pattern="(EEE, dd MMM)" timeZone="GMT+8"/>
+                                            </h:outputText>             
+                                        </span>
+                                        <span class="email">Taker: #{scheduleManagementManagedBean.getTakerFirstName2(swapPermissionFromOthers)}</span>
+                                        <span class="email2">Status: #{swapPermissionFromOthers.permissionStatus}</span>                                                                                     
+                                    </a>
+                                </li>
+                            </ul>
+                            <p:commandButton id="requestFromOthersEditButton" actionListener="#{scheduleManagementManagedBean.getTheSelectedSwapPermission(swapPermissionFromOthers)}"  update="dialogEditRequestFromOthers" oncomplete="PF('dialogEditRequestFromOthers').show();" style="display: none"></p:commandButton>
+                            <p:dialog id="dialogEditRequestFromOthers" modal="true" header="Approval of Request" widgetVar="dialogEditRequestFromOthers" closable="true" resizable="false">
+                                <h:form id="requestFromOthersForm">
+                                    <p:panelGrid styleClass="nba-grid">
+                                        <p:row style="border: none;">
+                                            <p:column rowspan="2" style="border: none;">
+                                                <p:graphicImage name="images/#{swapPermissionFromOthers.task.taskDay}.png" library="ultima-layout" width="45"/>
+                                            </p:column>
+                                            <p:column style="border: none;font-weight: bold;">
+                                                <span class="name" style="font-size: 18px">#{swapPermissionFromOthers.owner.firstName}</span>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="border: none;">
+                                            <p:column style="border: none;">
+                                                <span class="email"><h:outputText value="#{swapPermissionFromOthers.task.startTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                    </h:outputText>
+                                                    <h:outputLabel value=" — " class="overview-title"/>
+                                                    <h:outputText value="#{swapPermissionFromOthers.task.endTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a, (EEE, dd MMM)" timeZone="GMT+8"/>
+                                                    </h:outputText><br></br>Taker: #{scheduleManagementManagedBean.takerNameWithStatus(swapPermissionFromOthers)}</span>                                                
+                                            </p:column>
+                                        </p:row>  
+                                        
+                                        <p:row style="border: none; text-align: center">
+                                            <p:column colspan="2" style="border: none;" >
+                                                <p:commandButton value="Approve" icon="ui-icon-send" actionListener="#{scheduleManagementManagedBean.permissionFromOthersManagemnetAdmin(swapPermissionFromOthers)}" oncomplete="PF('dialogEditRequestFromOthers').hide();"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:dialog> 
+                        </ui:repeat>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{scheduleManagementManagedBean.hasRequestsFromOthers()}">
+                        <div style="padding: 110px 0 110px 0; text-align: center">
+                            <p>There is no request for switching schedule.</p>
+                        </div>
+                    </ui:fragment>
+                </p:panel>
+            </div>
+            <div class="ui-g-12 ui-md-8">
+                <h:form id="userManagementForm">
+                    <p:dataTable id="dataTableEmployees" widgetVar="dataTableEmployees" 
+                                 value="#{dashboardManagedBean.myWorkers}" var="user" 
+                                 reflow="true" rowKey="#{user.userId}" rows="4"
+                                 paginator="true"
+                                 style="margin-bottom:20px"
+                                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="4,8,12,16"
+                                 >
+                        <f:facet name="header">User Management</f:facet>
+                        <p:ajax event="rowSelect" listener="#{dashboardManagedBean.onRowSelect}"/>
+                        <p:column headerText="Email" sortBy="#{user.email}">
+                            <center>
+                                <h:outputText value="#{user.email}" />
+                            </center>
+                        </p:column>
+                        <p:column headerText="Name" sortBy="#{user.firstName}" width="20%">
+                            <center>
+                                <h:outputText value="#{user.firstName} #{user.lastName}" />
+                            </center>
+                        </p:column>
+                        <p:column headerText="$/h" sortBy="#{user.hourlyPayment}" width="11%">
+                            <center>
+                                <h:outputText value="$#{user.hourlyPayment}" />
+                            </center>
+                        </p:column>
+                        <p:column headerText="Status" sortBy="#{user.userStatus}" width="15%">
+                            <center>
+                                <h:outputText value="#{user.userStatus}" />
+                            </center>
+                        </p:column>
+                        <p:column headerText="Role" sortBy="#{user.userGroup.userGroupRole}" width="12%">
+                            <center>
+                                <h:outputText value="#{user.userGroup.userGroupRole}" />
+                            </center>
+                        </p:column>
+                        <p:column style="width:12%">
+                            <center>
+                                <p:commandButton  update="editUserForm" icon="ui-icon-pencil" oncomplete="PF('dialogEditUser').show()">
+                                    <f:setPropertyActionListener value="#{user}" target="#{dashboardManagedBean.selectedUser}"/>
+                                </p:commandButton>
+                            </center>
+                        </p:column> 
+                    </p:dataTable>      
+                </h:form>
+                <p:dialog id="dialogEditUser" modal="true" header="User Management" widgetVar="dialogEditUser" closable="true" resizable="false">      
+                    <h:form id="editUserForm">
+                        <p:panelGrid styleClass="nba-grid">
+                            <p:row style="border: none;">
+                                <p:column style="border: none;">
+                                    <p:graphicImage name="images/#{dashboardManagedBean.selectedUser.firstName}.png" library="ultima-layout" width="45"/>                                                                            
+                                </p:column>
+                                <p:column style="border: none;">
+                                    <span style="font-size: 18px">
+                                        #{dashboardManagedBean.selectedUser.firstName}
+                                    </span>
+                                    <span>
+                                        <br></br>
+                                        #{dashboardManagedBean.selectedUser.email}
+                                    </span>
+                                </p:column>
+                            </p:row>
+                            <p:row style="border: none;">
+                                <p:column style="border: none;">
+                                    <p:outputLabel value="Hourly Payment:"/>
+                                </p:column> 
+                                <p:column style="border: none;">
+                                    <p:spinner  stepFactor="0.5" size="9" value="#{dashboardManagedBean.selectedUser.hourlyPayment}"/>
+                                </p:column>                                  
+                            </p:row>
+                            <p:row style="border: none;">
+                                <p:column style="border: none;">
+                                    <p:outputLabel value="Status:"/>
+                                </p:column> 
+                                <p:column style="border: none;">
+                                    <p:selectOneMenu value="#{dashboardManagedBean.selectedUser.userStatus}">                                        
+                                        <f:selectItem itemLabel="Select One" itemValue="" />
+                                        <f:selectItems value="#{dashboardManagedBean.allUserStatus}" var="status" itemLabel="#{status}" itemValue="#{status}" />
+                                    </p:selectOneMenu>
+                                </p:column>                                  
+                            </p:row>
+                            <p:row style="border: none;">
+                                <p:column style="border: none;">
+                                    <p:outputLabel value="Role:"/>
+                                </p:column> 
+                                <p:column style="border: none;">
+                                    <p:selectOneMenu value="#{dashboardManagedBean.selectedRole}">
+                                        <f:selectItem itemLabel="Select One" itemValue="" />
+                                        <f:selectItems value="#{dashboardManagedBean.allUserRole}" var="userGroup" itemLabel="#{userGroup.userGroupRole}" itemValue="#{userGroup.userGroupId}" />
+                                    </p:selectOneMenu>
+                                </p:column>                                  
+                            </p:row>
+                            <p:row style="border: none; text-align: center">
+                                <p:column colspan="2" style="border: none;" >
+                                    <p:commandButton value="CONFIRM" icon="ui-icon-send" actionListener="#{dashboardManagedBean.updateSelectedUser()}" oncomplete="PF('dialogEditUser').hide();"/>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                    </h:form>
+                </p:dialog>    
+            </div>
+        </div>
+    </ui:define>
+    
+</ui:composition>

@@ -1,0 +1,35 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+                    
+    <ui:define name="content">
+        <div class="ui-g">
+            <div class="ui-g-12 card">              
+                <h:form id="profileForm" style="text-align: center">
+                    <div class="ui-g">
+                        <div class="ui-g-12">
+                            <img src="resources/ultima-layout/images/#{profileManagedBean.user.firstName}.png" style="background:top left no-repeat;background-size:120px 120px;width: 120px;height: 120px;margin: 0 auto 5px auto;border-radius: 50%;"></img>                                     
+                        </div>
+                        <div class="ui-g-12">
+                            <p:outputLabel value="#{profileManagedBean.user.firstName} #{profileManagedBean.user.lastName}" style="font-size: 18px; font-weight: bold"></p:outputLabel>                          
+                            <br></br>
+                            <p:outputLabel value="#{profileManagedBean.user.email}" style="font-size: 15px;"></p:outputLabel> 
+                        </div>
+                        <div class="ui-g-12">
+                            <div class="ui-g-4"></div>
+                            <div class="ui-g-4">       
+                                <p:outputLabel value="First Name:"></p:outputLabel>                          
+                             <p:outputLabel value="First Name:"></p:outputLabel>   </div>
+                            <div class="ui-g-4"></div>
+                            
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+        
+</ui:composition>

@@ -1,0 +1,57 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:pu="http://primefaces.org/ultima">
+    
+    <h:form id="menuform"> 
+        <div class="layout-menu #{guestPreferences.menuClass}">
+            <div class="nano">
+                <div class="nano-content menu-scroll-content">
+                    <ui:fragment rendered="#{guestPreferences.profileMode == 'inline' and guestPreferences.menuLayout != 'menu-layout-static menu-layout-horizontal'}">
+                        <div class="profile">
+                            <div class="profile-image">
+                                <img src="resources/ultima-layout/images/#{loginManagedBean.user.firstName}.png" style="background:top left no-repeat;background-size:60px 60px;width: 60px;height: 60px;margin: 0 auto 5px auto;border-radius: 50%;"></img>
+                            </div>
+                            <a id="profile-options" href="#">
+                                <span class="profile-name">#{loginManagedBean.user.firstName} #{loginManagedBean.user.lastName}</span>
+                                <i class="material-icons">&#xE313;</i>
+                            </a>
+                        </div>
+                        
+                        <ul id="profile-menu" class="ultima-menu">
+                            <li role="menuitem">
+                                <a href="#" class="ripplelink" onclick="document.getElementById('menuform:profile_button').click();">
+                                    <i class="material-icons">person</i>
+                                    <span>Profile</span>
+                                    <h:commandButton id="profile_button" actionListener="#{loginManagedBean.redirectProfile()}" style="display:none;"></h:commandButton>
+                                </a>
+                            </li>                            
+                            <li role="menuitem">
+                                <a href="#" class="ripplelink" onclick="document.getElementById('menuform:logout_button').click();">
+                                    <i class="material-icons">power_settings_new</i>
+                                    <span>Logout</span>
+                                    <h:commandButton id="logout_button" actionListener="#{loginManagedBean.logout()}" style="display:none;"></h:commandButton>
+                                </a>
+                            </li>
+                        </ul>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{loginManagedBean.adminLogin()}">     
+                        <pu:menu widgetVar="me">
+                            <p:menuitem id="um_dashboardAdmin" value="Dashboard" icon="&#xE871;" outcome="/dashboard_admin"/>
+                        </pu:menu>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{!loginManagedBean.adminLogin()}">
+                        <pu:menu widgetVar="me">
+                            <p:menuitem id="um_dashboard" value="Dashboard" icon="&#xE871;" outcome="/dashboard_mine"/>
+                            <p:menuitem id="um_schedule" value="Schedule Management" icon="assignment" outcome="/schedule_management"/>
+                        </pu:menu>
+                    </ui:fragment>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</ui:composition>

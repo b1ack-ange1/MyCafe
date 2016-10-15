@@ -1,0 +1,255 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+    template="/WEB-INF/template.xhtml">
+        
+    <ui:define name="content">
+        <div class="ui-g dashboard">
+            <div class="ui-g-12 ui-lg-4 contacts">
+                <p:panel id="current_week_schedule" header="My Schedule">
+                    <ui:repeat id="current_week_schedule_repeat" var="task" value="#{scheduleManagementManagedBean.currentWeekTasks}" varStatus="status">
+                        <ul>
+                            <li>
+                                <a href="#" onclick="document.getElementById('current_week_schedule_repeat:#{status.index}:scheduleEditButton').click()">
+                                    <p:graphicImage name="images/#{task.taskDay}.png" library="ultima-layout" width="45"/>
+                                    <span class="name">
+                                        <h:outputText value="#{task.startTime}" class="overview-title">
+                                            <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                        </h:outputText>
+                                        <h:outputLabel value=" — " class="overview-title"/>
+                                        <h:outputText value="#{task.endTime}" class="overview-title">
+                                            <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                        </h:outputText>
+                                    </span>
+                                    <span class="email">#{scheduleManagementManagedBean.getCurrentUserSchedule(task)} Shift 
+                                        <h:outputText value="#{task.startTime}" class="overview-title">
+                                            <f:convertDateTime pattern="(dd MMM)" timeZone="GMT+8"/>
+                                        </h:outputText>
+                                    </span>                             
+                                </a>
+                                <p:commandButton id="scheduleEditButton" actionListener="#{scheduleManagementManagedBean.getTheSelectedTask(task)}"  update="dialogScheduleTask" oncomplete="PF('dialogScheduleTask').show();" style="display: none"></p:commandButton>
+                            </li> 
+                        </ul>
+                            
+                        <p:dialog id="dialogScheduleTask" modal="true" header="Schedule Management" widgetVar="dialogScheduleTask" closable="true" resizable="false">
+                            <h:form id="scheduleForm">
+                                <p:panelGrid styleClass="nba-grid">
+                                    <p:row style="border: none;">
+                                        <p:column rowspan="2" style="border: none;">
+                                            <p:graphicImage name="images/#{task.taskDay}.png" library="ultima-layout" width="45"/>
+                                        </p:column>
+                                        <p:column style="border: none;font-weight: bold;">
+                                            <span class="name">
+                                                <h:outputText value="#{task.startTime}" class="overview-title">
+                                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                </h:outputText>
+                                                <h:outputLabel value=" — " class="overview-title"/>
+                                                <h:outputText value="#{task.endTime}" class="overview-title">
+                                                    <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                </h:outputText>
+                                            </span>
+                                        </p:column>
+                                    </p:row>
+                                    <p:row style="border: none;">
+                                        <p:column style="border: none;">
+                                            <span class="email">#{scheduleManagementManagedBean.getCurrentUserSchedule(task)} Shift</span>  
+                                        </p:column>
+                                    </p:row>
+                                    <p:row style="border: none; text-align: center">
+                                        <p:column colspan="2" style="border: none;" >
+                                            <p:selectOneButton value="#{scheduleManagementManagedBean.currentArrangement}">
+                                                <p:ajax update="@form scheduleForm"/>
+                                                <f:selectItem itemLabel="Found Replacement" itemValue="withTaker"/>
+                                                <f:selectItem itemLabel="SOS All" itemValue="noTaker" />
+                                            </p:selectOneButton>
+                                        </p:column>
+                                    </p:row>
+                                        
+                                    <p:row style="border: none;" id="replacementRow">
+                                        <ui:fragment rendered="#{scheduleManagementManagedBean.retrieveCurrentArrangementType()}">
+                                            <p:column style="border: none;">
+                                                <p:outputLabel value="My Replacement:"/>
+                                            </p:column>
+                                            <p:column style="border: none;">
+                                                <p:selectOneMenu value="#{scheduleManagementManagedBean.myTaker}">
+                                                    <p:ajax listener="#{scheduleManagementManagedBean.printTaker}"/>
+                                                    <f:selectItem itemLabel="Select One" itemValue="" />
+                                                    <f:selectItems value="#{scheduleManagementManagedBean.allUsers}" var="taker" itemLabel="#{taker.firstName}" itemValue="#{taker.userId}" />
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                        </ui:fragment>
+                                    </p:row>   
+                                        
+                                    <p:row style="border: none; text-align: center">
+                                        <p:column colspan="2" style="border: none;" >
+                                            <p:commandButton value="CONFIRM" icon="ui-icon-send" actionListener="#{scheduleManagementManagedBean.generateNewRequest(task)}" oncomplete="PF('dialogScheduleTask').hide();"/>
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </h:form>
+                        </p:dialog> 
+                    </ui:repeat>
+                </p:panel>
+            </div>
+                
+            <div class="ui-g-12 ui-lg-4 contacts">
+                <p:panel header="My Request" >
+                    <ui:fragment rendered="#{!scheduleManagementManagedBean.hasRequests()}">
+                        <ui:repeat id="request_repeat" var="swapPermission" value="#{scheduleManagementManagedBean.swapPermissions}" varStatus="status">
+                            <ul>
+                                <li>
+                                    <a href="#" onclick="document.getElementById('request_repeat:#{status.index}:requestEditButton').click()">
+                                        <p:graphicImage name="images/#{swapPermission.task.taskDay}.png" library="ultima-layout" width="45"/>
+                                        <span class="name">#{scheduleManagementManagedBean.getCurrentUserSchedule(swapPermission.task)} 
+                                            <h:outputText value="#{swapPermission.task.startTime}" class="overview-title">
+                                                <f:convertDateTime pattern="(dd MMM)" timeZone="GMT+8"/>
+                                            </h:outputText>: #{swapPermission.permissionStatus}</span>
+                                        <span class="email">Administrator status: #{swapPermission.bossStatus}</span>
+                                        <span class="email2">#{scheduleManagementManagedBean.getTakerFirstName(swapPermission)} status: #{swapPermission.takerStatus}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <p:commandButton id="requestEditButton" actionListener="#{scheduleManagementManagedBean.getTheSelectedSwapPermission(swapPermission)}"  update="dialogEditRequest" oncomplete="PF('dialogEditRequest').show();" style="display: none"></p:commandButton>
+                            <p:dialog id="dialogEditRequest" modal="true" header="Request Management" widgetVar="dialogEditRequest" closable="true" resizable="false">
+                                <h:form id="requestForm">
+                                    <p:panelGrid styleClass="nba-grid">
+                                        <p:row style="border: none;">
+                                            <p:column rowspan="2" style="border: none;">
+                                                <p:graphicImage name="images/#{swapPermission.task.taskDay}.png" library="ultima-layout" width="45"/>
+                                            </p:column>
+                                            <p:column style="border: none;font-weight: bold;">
+                                                <span class="name">
+                                                    <h:outputText value="#{swapPermission.task.startTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                    </h:outputText>
+                                                    <h:outputLabel value=" — " class="overview-title"/>
+                                                    <h:outputText value="#{swapPermission.task.endTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                    </h:outputText>
+                                                </span>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="border: none;">
+                                            <p:column style="border: none;">
+                                                <span class="email">#{scheduleManagementManagedBean.getCurrentUserSchedule(swapPermission.task)} Shift</span>  
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="border: none; text-align: center">
+                                            <p:column colspan="2" style="border: none;" >
+                                                <p:selectOneButton value="#{scheduleManagementManagedBean.requestArrangement}">
+                                                    <p:ajax update="@form requestForm"/>
+                                                    <f:selectItem itemLabel="Edit Request" itemValue="edit"/>
+                                                    <f:selectItem itemLabel="Cancel Request" itemValue="cancel" />
+                                                </p:selectOneButton>
+                                            </p:column>
+                                        </p:row>
+                                            
+                                        <p:row style="border: none;">
+                                            <ui:fragment rendered="#{scheduleManagementManagedBean.retrieveRequestArrangementType()}">
+                                                <p:column style="border: none;">
+                                                    <p:outputLabel value="My Replacement:"/>
+                                                </p:column>
+                                                <p:column style="border: none;">
+                                                    <p:selectOneMenu value="#{scheduleManagementManagedBean.myTaker}">
+                                                        <p:ajax listener="#{scheduleManagementManagedBean.printTaker}"/>
+                                                        <f:selectItem itemLabel="Select One" itemValue="" />
+                                                        <f:selectItems value="#{scheduleManagementManagedBean.allUsers}" var="taker" itemLabel="#{taker.firstName}" itemValue="#{taker.userId}" />
+                                                    </p:selectOneMenu>
+                                                </p:column>
+                                            </ui:fragment>
+                                        </p:row>   
+                                            
+                                        <p:row style="border: none; text-align: center">
+                                            <p:column colspan="2" style="border: none;" >
+                                                <p:commandButton value="CONFIRM" icon="ui-icon-send" actionListener="#{scheduleManagementManagedBean.permissionManagement(swapPermission)}" oncomplete="PF('dialogEditRequest').hide();"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:dialog> 
+                        </ui:repeat>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{scheduleManagementManagedBean.hasRequests()}">
+                        <div style="padding: 110px 0 110px 0; text-align: center">
+                            <p>There is no request for switching schedule.</p>
+                        </div>
+                    </ui:fragment>
+                </p:panel>
+            </div>
+            
+            <div class="ui-g-12 ui-lg-4 contacts">
+                <p:panel header="Request From Others">
+                    <ui:fragment rendered="#{!scheduleManagementManagedBean.hasRequestsFromOthers()}">
+                        <ui:repeat id="requestFromOthers_repeat" var="swapPermissionFromOthers" value="#{scheduleManagementManagedBean.swapPermissionsFromOthers}" varStatus="status">
+                            <ul>
+                                <li>
+                                    <a href="#" onclick="document.getElementById('requestFromOthers_repeat:#{status.index}:requestFromOthersEditButton').click()">
+                                        <p:graphicImage name="images/#{swapPermissionFromOthers.owner.firstName}.png" library="ultima-layout" width="45"/>
+                                        <span class="name">
+                                            #{scheduleManagementManagedBean.getCurrentUserSchedule(swapPermissionFromOthers.task)} Shift <h:outputText value="#{swapPermissionFromOthers.task.startTime}" class="overview-title">
+                                                <f:convertDateTime pattern="(EEE, dd MMM)" timeZone="GMT+8"/>
+                                            </h:outputText>                              
+                                        </span>
+                                        <span class="email">Owner: #{swapPermissionFromOthers.task.user.firstName}</span>
+                                        <span class="email2">Taker: #{scheduleManagementManagedBean.getTakerFirstName2(swapPermissionFromOthers)}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <p:commandButton id="requestFromOthersEditButton" actionListener="#{scheduleManagementManagedBean.getTheSelectedSwapPermission(swapPermissionFromOthers)}"  update="dialogEditRequestFromOthers" oncomplete="PF('dialogEditRequestFromOthers').show();" style="display: none"></p:commandButton>
+                            <p:dialog id="dialogEditRequestFromOthers" modal="true" header="Acceptance Of Request" widgetVar="dialogEditRequestFromOthers" closable="true" resizable="false">
+                                <h:form id="requestFromOthersForm">
+                                    <p:panelGrid styleClass="nba-grid">
+                                        <p:row style="border: none;">
+                                            <p:column rowspan="2" style="border: none;">
+                                                <p:graphicImage name="images/#{swapPermissionFromOthers.task.taskDay}.png" library="ultima-layout" width="45"/>
+                                            </p:column>
+                                            <p:column style="border: none;font-weight: bold;">
+                                                <span class="name">
+                                                    <h:outputText value="#{swapPermissionFromOthers.task.startTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                    </h:outputText>
+                                                    <h:outputLabel value=" — " class="overview-title"/>
+                                                    <h:outputText value="#{swapPermissionFromOthers.task.endTime}" class="overview-title">
+                                                        <f:convertDateTime pattern="hh:mm a" timeZone="GMT+8"/>
+                                                    </h:outputText>
+                                                </span>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row style="border: none;">
+                                            <p:column style="border: none;">
+                                                <span class="email">#{scheduleManagementManagedBean.getCurrentUserSchedule(swapPermissionFromOthers.task)} Shift</span>  
+                                            </p:column>
+                                        </p:row>
+                                        
+                                        <p:row style="border: none; text-align: center">
+                                            <p:column colspan="2" style="border: none;" >
+                                                <p:selectOneButton value="#{scheduleManagementManagedBean.requestFromOthersArrangement}">
+                                                    <p:ajax update="@form requestFromOthersForm"/>
+                                                    <f:selectItem itemLabel="Accept Request" itemValue="accept"/>
+                                                    <f:selectItem itemLabel="Reject Request " itemValue="reject" />
+                                                </p:selectOneButton>
+                                            </p:column>
+                                        </p:row>  
+                                        
+                                        <p:row style="border: none; text-align: center">
+                                            <p:column colspan="2" style="border: none;" >
+                                                <p:commandButton value="Confirm" icon="ui-icon-send" actionListener="#{scheduleManagementManagedBean.permissionFromOthersManagemnet(swapPermissionFromOthers)}" oncomplete="PF('dialogEditRequestFromOthers').hide();"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </h:form>
+                            </p:dialog> 
+                        </ui:repeat>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{scheduleManagementManagedBean.hasRequestsFromOthers()}">
+                        <div style="padding: 110px 0 110px 0; text-align: center">
+                            <p>There is no request for switching schedule.</p>
+                        </div>
+                    </ui:fragment>
+                </p:panel>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
