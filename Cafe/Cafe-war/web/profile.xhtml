@@ -3,8 +3,8 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template.xhtml">
-                    
+    template="/WEB-INF/template.xhtml">
+        
     <ui:define name="content">
         <div class="ui-g">
             <div class="ui-g-12 card">              
@@ -20,16 +20,61 @@
                         </div>
                         <div class="ui-g-12">
                             <div class="ui-g-4"></div>
-                            <div class="ui-g-4">       
-                                <p:outputLabel value="First Name:"></p:outputLabel>                          
-                             <p:outputLabel value="First Name:"></p:outputLabel>   </div>
+                            <div class="ui-g-4">
+                                <p:panelGrid styleClass="nba-grid ui-g-12">
+                                    <p:row style="border: none;">
+                                        <p:column style="border: none;">
+                                            <p:outputLabel value="Hourly Payment: #{profileManagedBean.showHourlyPayment()}" style="font-size: 15px;"></p:outputLabel> 
+                                        </p:column>
+                                        <p:column style="border: none;">
+                                            <p:outputLabel value="User Status: #{profileManagedBean.user.userGroup.userGroupRole}" style="font-size: 15px;"></p:outputLabel> 
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </div>
                             <div class="ui-g-4"></div>
-                            
                         </div>
+                        <div class="ui-g-12">
+                            <p:selectOneButton value="#{profileManagedBean.editArea}">
+                                <p:ajax update="@form profileForm"/>
+                                <f:selectItem itemLabel="Edit Name" itemValue="name"/>
+                                <f:selectItem itemLabel="UpLoad Profile Picture" itemValue="pic" />
+                            </p:selectOneButton>
+                        </div>
+                        <ui:fragment rendered="#{profileManagedBean.showEditArea()}">                                                                   
+                            <div class="ui-g-12">
+                                <div class="ui-g-4"></div>
+                                <div class="ui-g-4" style="text-align: center;">       
+                                    <p:panelGrid styleClass="nba-grid ui-g-12">
+                                        <br></br> 
+                                        <h:panelGroup styleClass="md-inputfield">
+                                            <p:inputText style="width: 100%" value="#{profileManagedBean.user.firstName}"/>
+                                            <label>New First Name</label>
+                                        </h:panelGroup>
+                                        <br></br>   
+                                        <br></br>
+                                        <h:panelGroup styleClass="md-inputfield">
+                                            <p:inputText style="width: 100%" value="#{profileManagedBean.user.lastName}"/>
+                                            <label>New Last Name</label>
+                                        </h:panelGroup>     
+                                    </p:panelGrid>
+                                </div>
+                                <div class="ui-g-4"></div>
+                            </div>    
+                            <div class="ui-g-12">
+                                <div class="ui-g-4"></div>
+                                <div class="ui-g-4">
+                                    <p:commandButton value="CONFIRM" actionListener="#{profileManagedBean.updateUser()}" icon="ui-icon-send"/>
+                                </div>     
+                                <div class="ui-g-4"></div>    
+                            </div>
+                        </ui:fragment> 
                     </div>
+                        
+                    
                 </h:form>
             </div>
         </div>
     </ui:define>
-        
+    
 </ui:composition>
